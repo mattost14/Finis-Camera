@@ -1,0 +1,2 @@
+# Ignore all .tif files in folders and subfolders
+**/*.tif

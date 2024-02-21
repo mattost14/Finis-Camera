@@ -1,0 +1,19 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    
+    {
+      "name": "Python: Current File",
+      "type": "python",
+      "python": "/Users/BrunoMattos/.pyenv/shims/python",
+      "request": "launch",
+      "program": "launch.py",
+      // "args": ["129.123.5.125"],
+      "console": "integratedTerminal",
+      "justMyCode": true
+    }
+  ]
+}

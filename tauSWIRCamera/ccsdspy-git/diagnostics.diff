@@ -1,0 +1,32 @@
+diff --git a/ccsdspy/message.py b/ccsdspy/message.py
+index 81ac878..cce4c44 100644
+--- a/ccsdspy/message.py
++++ b/ccsdspy/message.py
+@@ -98,6 +98,8 @@ class _packet_buffer(object):
+     @property
+     def buffer(self):
+         # TODO: optionally check CRC here
++        #crc = int.from_bytes(self._buffer[self.size:self.size+4], byteorder='little')
++        #print(f'{crc:08x}')
+         return self._buffer[0:self.size]
+     
+     def reset(self):
+@@ -111,12 +113,18 @@ class _packet_buffer(object):
+             src_offset = _CCSDS_HEADER_SIZE
+             self.header.load(data)
+             self._size = 1 + src_offset + self.header.packet_data_length
++            #print(self._size)
+             src_offset += _CCSDS_HEADER_SIZE if self.header.secondary_header else 0
++            #crc = int.from_bytes(data[_CCSDS_HEADER_SIZE:_CCSDS_HEADER_SIZE+4], byteorder='little')
++            #print(f'{crc:08x}')
+         else:
+             src_offset = 0
+             old_pos = self._pos
+         self._pos = min(old_pos + len(data), self._size)
+         size = self._pos - old_pos
++        #if old_pos + len(data) > self._size:
++        #    crc = int.from_bytes(data[src_offset+size+4:src_offset+size+8], byteorder='little')
++        #    print(f'{crc:08x}', self._size)
+         self.complete = (self._size == self._pos)
+         self._buffer[self._dst_offset:self._dst_offset+size] = data[src_offset:size]
+         self._dst_offset += size - src_offset
