@@ -1,0 +1,8 @@
+Number of pixels outside +/- 5sigma range: 3
+Num hot pixels (>5sigma): 3
+Num cold pixels (<5sigma): 0
+
+num, Pixel_x, Pixel_y, Pixel_Mean, Pixel_Std
+1, 39, 88, 13178.4, 100.85474703750934
+2, 412, 274, 16362.52, 69.45105902720275
+3, 413, 274, 16383.0, 0.0
