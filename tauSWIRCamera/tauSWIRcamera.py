@@ -187,8 +187,13 @@ class tauSWIRcamera:
                 raise "Error on setting the gain!"
             
     def setIntTime(self, int_time_ms):
-        subprocess.run(["ssh", cameraAddress, "./setIntTime.sh", str(int_time_ms)], capture_output=True)
-        time.sleep(2/30)
+        multiplier = 5707.807
+        result = int(int_time_ms * multiplier)
+        # Convert decimal number to hexadecimal and remove '0x' prefix
+        hexadecimal_string = hex(result)[2:]
+        # Ensure the hexadecimal string has 8 digits by padding with zeros if necessary
+        hexadecimal_string = hexadecimal_string.zfill(8)
+        subprocess.run(["ssh", cameraAddress, cameraCommand,"A1",hexadecimal_string,"-d 2"], capture_output=True)
         # Now check if the gain change was accepted
         intTimeFromCamera = self.getIntTime()
         if abs(intTimeFromCamera - int_time_ms)/int_time_ms < 0.02 : # Tolerate 1% difference
@@ -216,7 +221,7 @@ class tauSWIRcamera:
         fps_hex = fps_hex.zfill(2)
         subprocess.run(["ssh", cameraAddress, cameraCommand,"ED",f"021000{fps_hex}0001000102000280","-d 2"], capture_output=True)
         # Now check if the gain change was accepted
-        time.sleep(2/30)
+        time.sleep(1)
         actualFPS = self.getFPS()
         if actualFPS ==  fps: 
             print(f"Frame rate set to: {fps}")
@@ -354,11 +359,13 @@ class tauSWIRcamera:
         imglist = []
         fpaTemp = np.array([])
         
-        while N < numFrames:
+        while N < numFrames+1: # (Bruno) I added one to skip the first frame (because it's usually bad)
             if not msg.decode(): continue
             frame = _process_message(msg.buffer)
             if 'SWIR' in frame:
                 N +=1
+                if N==1: # Skip the first frame
+                    continue
                 # print(f"Frame: {N}/{numFrames}")
                 # print('.', end='')
                 imglist.append(frame["SWIR"])
