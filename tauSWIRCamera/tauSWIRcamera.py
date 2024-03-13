@@ -25,6 +25,10 @@ def _process_message(data):
         (complete, camera, data) = process_raw_data(data)
         if complete:
             data_point[camera] = data
+    elif msg_type == 4:#message_type.ps_housekeeping:
+        queue_length = int.from_bytes(data[16:16+4], byteorder='little')
+        queue_length /= 1024*1024 # bytes -> MB
+        data_point['Queue_Length'] = queue_length #units: bytes, It should <100MB
     return data_point
 
 def extract_hex_values_from_response(input_string):
@@ -362,22 +366,19 @@ class tauSWIRcamera:
         while N < numFrames+1: # (Bruno) I added one to skip the first frame (because it's usually bad)
             if not msg.decode(): continue
             frame = _process_message(msg.buffer)
+
             if 'SWIR' in frame:
                 N +=1
                 if N==1: # Skip the first frame
                     continue
-                # print(f"Frame: {N}/{numFrames}")
-                # print('.', end='')
                 imglist.append(frame["SWIR"])
-
                 if returnFPAtemp == True:
                     temp_actual = self.getFPAtemp()
                     fpaTemp = np.append(fpaTemp, temp_actual)
-                # img = Image.fromarray(frame['SWIR'], 'L')
-                # img.show()
-                # imglist= TiffWriter('images/img.tif')
-                # imglist.write(frame["SWIR"], contiguous=True, subfiletype=2)
-                # imglist.close()
+            elif 'Queue_Length' in frame:
+                if frame['Queue_Length']>100:
+                    print(f"WARNING: Possible sync error! Queue Usage: {frame['Queue_Length']}MB")
+
         # Close the stream of data
         # print(" ")
         stream.close()
