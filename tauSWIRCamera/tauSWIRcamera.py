@@ -83,17 +83,33 @@ class tauSWIRcamera:
 
     def _runSetupScript(self, syncMode):
         print("## START CAMERA SETUP ##")
+
+
         # 1 - DISABLE ANALOG MODE AND ZOOM 
         print(f"1. Analog mode set to: DISABLED")
         subprocess.run(["ssh", cameraAddress, cameraCommand,"0F","0002","-d 2"], capture_output=True)
 
         # 2 - SET EXTERNAL SYNC MODE
         print(f"2. External Sync Mode set to: {syncMode}")
-        # subprocess.run(["ssh", cameraAddress, cameraCommand,"0F","0002","-d 2"], capture_output=True)
+        if syncMode == "MASTER":
+            cmd = "0002"
+        elif syncMode == "SLAVE":
+            cmd = "0001"
+        else:
+            cmd = "0000"
+        subprocess.run(["ssh", cameraAddress, cameraCommand,"21",cmd,"-d 2"], capture_output=True)
 
         # 3 - SET AGC ALGORITHM TO MANUAL
         print("3. AGC set to: MANUAL")
         subprocess.run(["ssh", cameraAddress, cameraCommand,"13","0003","-d 2"], capture_output=True)
+
+        # 3 - SET BRIGHTNESS LEVEL
+        print("3. Brightness Level set to: 0")
+        subprocess.run(["ssh", cameraAddress, cameraCommand,"15","0000","-d 2"], capture_output=True)
+
+        # 3 - SET CONTRAST LEVEL
+        print("3. Contrast Level set to: 0")
+        subprocess.run(["ssh", cameraAddress, cameraCommand,"14","0000","-d 2"], capture_output=True)
 
         # 4 - DISABLE AUTO-EXPOSURE
         print("4. Auto-Exposure set to: DISABLED")
@@ -108,8 +124,10 @@ class tauSWIRcamera:
         subprocess.run(["ssh", cameraAddress, cameraCommand,"12","0700","-d 2"], capture_output=True)
 
         # 7 - SET INTEGRATION MODE UNRESTRICTED
-        print("7. Integration mode set to: UNRESTRICTED")
-        subprocess.run(["ssh", cameraAddress, cameraCommand,"ED","020E012300000000","-d 2"], capture_output=True)
+        print("7. Integration mode set to: ITR only (Integrate Then Read)")
+        subprocess.run(["ssh", cameraAddress, cameraCommand,"ED","020E012300000001","-d 2"], capture_output=True)
+        # print("7. Integration mode set to: UNRESTRICTED")
+        # subprocess.run(["ssh", cameraAddress, cameraCommand,"ED","020E012300000000","-d 2"], capture_output=True)
 
         # 8 - SET FPA SET POINT TEMP TO 20C
         print("8. FPA Set Point Temperature set to: 20oC")

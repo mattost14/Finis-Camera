@@ -95,7 +95,8 @@ def is_started(camera_idx, row_number):
     return frames[camera_idx]['started']
 
 def process_raw_data(data):
-    fields = load_fields(data, True)
+    # fields = load_fields(data, True) -- Disable the fast mode by Bruno
+    fields = load_fields(data)
     timestamp = fields['timestamp']
     camera_idx = fields['camera_idx']
     row_number = fields['row_number']
